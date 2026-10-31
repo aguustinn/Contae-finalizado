@@ -99,12 +99,6 @@ A proposta do Trabalho 4 é uma refatoração, não a criação de novas funcion
 
 > **Validação pendente:** a atualização da arquitetura e da documentação foi realizada no repositório, mas a compilação e os testes em dispositivo/emulador precisam ser executados no Android Studio antes da entrega. Registre aqui eventuais ajustes encontrados.
 
-## Documentação do Trabalho 4
-
-A documentação do processo e das decisões, organizada conforme a seção 4 do enunciado, está em:
-
-[ docs/TRABALHO_4_DOCUMENTACAO.md ](docs/TRABALHO_4_DOCUMENTACAO.md)
-
 ## Evidências
 
 Adicionar nesta seção prints ou vídeos reais da aplicação executando. Sugestões:
