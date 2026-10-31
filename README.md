@@ -122,6 +122,3 @@ Adicionar nesta seção prints ou vídeos reais da aplicação executando. Suges
 - [ ] Inserir evidências reais.
 - [ ] Completar a reflexão do trio com as experiências efetivamente vividas.
 
-## Integrantes
-
-Preencher com os nomes dos integrantes do trio.
