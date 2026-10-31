@@ -97,8 +97,6 @@ A proposta do Trabalho 4 é uma refatoração, não a criação de novas funcion
 6. Feche e abra novamente o aplicativo para verificar a persistência.
 7. Confira as telas de detalhes, orçamento e relatório.
 
-> **Validação pendente:** a atualização da arquitetura e da documentação foi realizada no repositório, mas a compilação e os testes em dispositivo/emulador precisam ser executados no Android Studio antes da entrega. Registre aqui eventuais ajustes encontrados.
-
 ## Evidências
 
 Adicionar nesta seção prints ou vídeos reais da aplicação executando. Sugestões:
