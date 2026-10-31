@@ -7,7 +7,6 @@ import com.example.contae.data.repository.CategoriaRepository
 import com.example.contae.data.repository.DespesaRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-data class DespesaUiState(val despesas:List<Despesa> = emptyList(), val categorias:List<Categoria> = emptyList(), val carregando:Boolean=true, val mensagem:String="")
 class DespesaViewModel(private val repository:DespesaRepository, private val categoriaRepository:CategoriaRepository):ViewModel() {
  private val _uiState=MutableStateFlow(DespesaUiState())
  val uiState:StateFlow<DespesaUiState> = _uiState.asStateFlow()
