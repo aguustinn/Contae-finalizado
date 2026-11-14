@@ -1,4 +1,8 @@
-package com.example.contae.navigation
+package com.example.contae.ui.screens
+import androidx.compose.runtime.collectAsState
+import com.example.contae.viewmodel.CategoriaViewModel
+import com.example.contae.viewmodel.DespesaViewModel
+
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -29,7 +33,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,8 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.contae.data.Dados
-import com.example.contae.model.Despesa
+import com.example.contae.data.model.Despesa
 import com.example.contae.ui.theme.Branco
 import com.example.contae.ui.theme.CardVerde
 import com.example.contae.ui.theme.Cinza
@@ -54,21 +56,11 @@ import com.example.contae.ui.theme.VerdePrincipal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TelaDetalhesDespesa(
-    id: Int,
-    navController: NavController
-) {
+fun TelaDetalhesDespesa(id: Int, navController: NavController, despesaViewModel: DespesaViewModel) {
+ val uiState by despesaViewModel.uiState.collectAsState()
 
-    var despesa by remember(id) {
-        mutableStateOf(Dados.despesas.firstOrNull { it.id == id })
-    }
-    var carregando by remember(id) { mutableStateOf(true) }
-
-    LaunchedEffect(id) {
-        Dados.carregarCategorias()
-        despesa = Dados.buscarDespesaPorId(id)
-        carregando = false
-    }
+ val despesa = uiState.despesas.firstOrNull { it.id == id }
+ val carregando = uiState.carregando
 
     if (despesa == null) {
 
@@ -149,7 +141,7 @@ fun TelaDetalhesDespesa(
 
     val despesaAtual = despesa ?: return
 
-    val categoria = Dados.categorias.find {
+    val categoria = uiState.categorias.find {
         it.id == despesaAtual.categoriaId
     }
 

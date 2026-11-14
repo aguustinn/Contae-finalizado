@@ -1,4 +1,4 @@
-package com.example.contae.screens
+package com.example.contae.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -26,7 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.contae.navigation.Rotas
+import com.example.contae.ui.navigation.Rotas
 import com.example.contae.ui.theme.Branco
 import com.example.contae.ui.theme.Cinza
 import com.example.contae.ui.theme.CinzaFundo

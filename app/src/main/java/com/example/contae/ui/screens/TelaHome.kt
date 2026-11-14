@@ -1,4 +1,8 @@
-package com.example.contae.navigation
+package com.example.contae.ui.screens
+import androidx.compose.runtime.collectAsState
+import com.example.contae.viewmodel.CategoriaViewModel
+import com.example.contae.viewmodel.DespesaViewModel
+
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -28,7 +32,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,8 +40,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.contae.data.Dados
-import com.example.contae.screens.BarraNavegacao
+import com.example.contae.ui.components.BarraNavegacao
+import com.example.contae.ui.navigation.Rotas
 import com.example.contae.ui.theme.Branco
 import com.example.contae.ui.theme.CardAzul
 import com.example.contae.ui.theme.CardVerde
@@ -49,17 +52,12 @@ import com.example.contae.ui.theme.VerdeEscuro
 import com.example.contae.ui.theme.VerdePrincipal
 
 @Composable
-fun TelaHome(
-    navController: NavController
-) {
-    LaunchedEffect(Unit) {
-        Dados.carregarTudo()
-    }
+fun TelaHome(navController: NavController, categoriaViewModel: CategoriaViewModel, despesaViewModel: DespesaViewModel) {
+ val categoriaState by categoriaViewModel.uiState.collectAsState()
+ val despesaState by despesaViewModel.uiState.collectAsState()
+val totalDespesas = despesaState.despesas.sumOf { it.valor }
 
-
-    val totalDespesas = Dados.despesas.sumOf { it.valor }
-
-    val totalCategorias = Dados.categorias.size
+    val totalCategorias = categoriaState.categorias.size
 
     Scaffold(
         containerColor = CinzaFundo,
@@ -254,7 +252,7 @@ fun TelaHome(
                         MiniCard(
                             modifier = Modifier.weight(1f),
                             titulo = "Despesas",
-                            valor = Dados.despesas.size.toString(),
+                            valor = despesaState.despesas.size.toString(),
                             icon = Icons.Filled.ReceiptLong,
                             background = CardAzul
                         )

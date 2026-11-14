@@ -1,4 +1,8 @@
-package com.example.contae.navigation
+package com.example.contae.ui.screens
+import androidx.compose.runtime.collectAsState
+import com.example.contae.viewmodel.CategoriaViewModel
+import com.example.contae.viewmodel.DespesaViewModel
+
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -29,7 +33,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,8 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.contae.data.Dados
-import com.example.contae.model.Categoria
+import com.example.contae.data.model.Categoria
 import com.example.contae.ui.theme.Branco
 import com.example.contae.ui.theme.CardVerde
 import com.example.contae.ui.theme.Cinza
@@ -54,21 +56,12 @@ import com.example.contae.ui.theme.VerdePrincipal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TelaDetalhesCategoria(
-    id: Int,
-    navController: NavController
-) {
+fun TelaDetalhesCategoria(id: Int, navController: NavController, categoriaViewModel: CategoriaViewModel, despesaViewModel: DespesaViewModel) {
+ val categoriaState by categoriaViewModel.uiState.collectAsState()
+ val despesaState by despesaViewModel.uiState.collectAsState()
 
-    var categoria by remember(id) {
-        mutableStateOf(Dados.categorias.firstOrNull { it.id == id })
-    }
-    var carregando by remember(id) { mutableStateOf(true) }
-
-    LaunchedEffect(id) {
-        Dados.carregarDespesas()
-        categoria = Dados.buscarCategoriaPorId(id)
-        carregando = false
-    }
+ val categoria = categoriaState.categorias.firstOrNull { it.id == id }
+ val carregando = categoriaState.carregando
 
     //se a cat nao existir
     if (categoria == null) {
@@ -150,7 +143,7 @@ fun TelaDetalhesCategoria(
     val categoriaAtual = categoria ?: return
 
     // Todas as despesas da categoria
-    val despesasCategoria = Dados.despesas.filter {
+    val despesasCategoria = despesaState.despesas.filter {
         it.categoriaId == categoriaAtual.id
     }
 

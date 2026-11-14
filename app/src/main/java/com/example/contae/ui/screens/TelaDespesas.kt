@@ -1,4 +1,8 @@
-package com.example.contae.navigation
+package com.example.contae.ui.screens
+import androidx.compose.runtime.collectAsState
+import com.example.contae.viewmodel.CategoriaViewModel
+import com.example.contae.viewmodel.DespesaViewModel
+
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -36,7 +40,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,9 +53,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.contae.data.Dados
-import com.example.contae.model.Despesa
-import com.example.contae.screens.BarraNavegacao
+import com.example.contae.data.model.Despesa
+import com.example.contae.ui.components.BarraNavegacao
+import com.example.contae.ui.navigation.Rotas
 import com.example.contae.ui.theme.Branco
 import com.example.contae.ui.theme.CardVerde
 import com.example.contae.ui.theme.Cinza
@@ -63,12 +66,9 @@ import com.example.contae.ui.theme.VerdePrincipal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TelaDespesas(navController: NavController) {
-    LaunchedEffect(Unit) {
-        Dados.carregarTudo()
-    }
-
-    var descricao by remember {
+fun TelaDespesas(navController: NavController, despesaViewModel: DespesaViewModel) {
+ val uiState by despesaViewModel.uiState.collectAsState()
+var descricao by remember {
         mutableStateOf("")
     }
 
@@ -282,7 +282,7 @@ fun TelaDespesas(navController: NavController) {
                             expanded = categoriasExpandidas,
                             onExpandedChange = { categoriasExpandidas = it }
                         ) {
-                            val categoriaSelecionada = Dados.categorias.find {
+                            val categoriaSelecionada = uiState.categorias.find {
                                 it.id.toString() == categoriaIdTexto
                             }
                             OutlinedTextField(
@@ -305,7 +305,7 @@ fun TelaDespesas(navController: NavController) {
                                 expanded = categoriasExpandidas,
                                 onDismissRequest = { categoriasExpandidas = false }
                             ) {
-                                Dados.categorias.forEach { categoria ->
+                                uiState.categorias.forEach { categoria ->
                                     DropdownMenuItem(
                                         text = { Text(categoria.nome) },
                                         onClick = {
@@ -317,7 +317,7 @@ fun TelaDespesas(navController: NavController) {
                                 }
                             }
                         }
-                        if (Dados.categorias.isEmpty()) {
+                        if (uiState.categorias.isEmpty()) {
                             Text(
                                 text = "Nenhuma categoria cadastrada. Cadastre uma na tela Categorias.",
                                 color = Color(0xFFD32F2F),
@@ -374,7 +374,7 @@ fun TelaDespesas(navController: NavController) {
                                         mensagem = "Selecione uma categoria."
                                     }
 
-                                    Dados.categorias.none { it.id == categoriaId } -> {
+                                    uiState.categorias.none { it.id == categoriaId } -> {
                                         mensagem = "Essa categoria não existe mais. Selecione outra."
                                     }
 
@@ -393,7 +393,7 @@ fun TelaDespesas(navController: NavController) {
                                             data = data.trim()
                                         )
 
-                                        Dados.salvarDespesa(despesa) { sucesso, resultado ->
+                                        despesaViewModel.salvarDespesa(despesa) { sucesso, resultado ->
                                             mensagem = resultado
 
                                             if (sucesso) {
@@ -513,7 +513,7 @@ fun TelaDespesas(navController: NavController) {
                     )
 
                     Text(
-                        text = "${Dados.despesas.size} registradas",
+                        text = "${uiState.despesas.size} registradas",
                         color = VerdePrincipal,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold
@@ -530,14 +530,14 @@ fun TelaDespesas(navController: NavController) {
             // =========================================================
 
             items(
-                items = Dados.despesas,
+                items = uiState.despesas,
                 key = {
                     it.id
                 }
             ) { despesa ->
 
                 val categoria =
-                    Dados.categorias.find {
+                    uiState.categorias.find {
                         it.id == despesa.categoriaId
                     }
 
@@ -699,7 +699,7 @@ fun TelaDespesas(navController: NavController) {
                                     IconButton(
                                         onClick = {
 
-                                            Dados.deletarDespesa(despesa)
+                                            despesaViewModel.deletarDespesa(despesa)
                                         }
                                     ) {
 

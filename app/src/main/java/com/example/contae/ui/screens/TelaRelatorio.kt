@@ -1,4 +1,8 @@
-package com.example.contae.navigation
+package com.example.contae.ui.screens
+import androidx.compose.runtime.collectAsState
+import com.example.contae.viewmodel.CategoriaViewModel
+import com.example.contae.viewmodel.DespesaViewModel
+
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,15 +20,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalanceWallet
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Assessment
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,8 +36,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.contae.data.Dados
-import com.example.contae.screens.BarraNavegacao
+import com.example.contae.ui.components.BarraNavegacao
+import com.example.contae.ui.navigation.Rotas
 import com.example.contae.ui.theme.Branco
 import com.example.contae.ui.theme.CardVerde
 import com.example.contae.ui.theme.Cinza
@@ -44,30 +47,34 @@ import com.example.contae.ui.theme.VerdeEscuro
 import com.example.contae.ui.theme.VerdePrincipal
 
 @Composable
-fun TelaOrcamento(navController: NavController) {
-    LaunchedEffect(Unit) {
-        Dados.carregarTudo()
-    }
+fun TelaRelatorio(navController: NavController, categoriaViewModel: CategoriaViewModel, despesaViewModel: DespesaViewModel) {
+ val categoriaState by categoriaViewModel.uiState.collectAsState()
+ val despesaState by despesaViewModel.uiState.collectAsState()
+val totalGasto =
+        despesaState.despesas.sumOf {
+            it.valor
+        }
 
+    val quantidadeDespesas =
+        despesaState.despesas.size
 
-    val limiteTotal = Dados.categorias.sumOf {
-        it.limite
-    }
-
-    val gastoTotal = Dados.despesas.sumOf {
-        it.valor
-    }
-
-    val restanteTotal =
-        limiteTotal - gastoTotal
-
-    val percentualTotal =
-        if (limiteTotal > 0) {
-            (gastoTotal / limiteTotal)
-                .coerceIn(0.0, 1.0)
-                .toFloat()
+    val media =
+        if (quantidadeDespesas > 0) {
+            totalGasto / quantidadeDespesas
         } else {
-            0f
+            0.0
+        }
+
+    val categoriaMaiorGasto =
+        categoriaState.categorias.maxByOrNull { categoria ->
+
+            despesaState.despesas
+                .filter {
+                    it.categoriaId == categoria.id
+                }
+                .sumOf {
+                    it.valor
+                }
         }
 
     Scaffold(
@@ -76,7 +83,7 @@ fun TelaOrcamento(navController: NavController) {
         bottomBar = {
             BarraNavegacao(
                 navController = navController,
-                rotaAtual = Rotas.ORCAMENTO
+                rotaAtual = Rotas.RELATORIO
             )
         }
 
@@ -88,6 +95,7 @@ fun TelaOrcamento(navController: NavController) {
                 .padding(paddingValues)
                 .background(CinzaFundo)
         ) {
+
 
             item {
 
@@ -118,7 +126,7 @@ fun TelaOrcamento(navController: NavController) {
 
                             Icon(
                                 imageVector =
-                                    Icons.Filled.AccountBalanceWallet,
+                                    Icons.Filled.Assessment,
 
                                 contentDescription = null,
 
@@ -136,7 +144,7 @@ fun TelaOrcamento(navController: NavController) {
                         Column {
 
                             Text(
-                                text = "Orçamento",
+                                text = "Relatório",
                                 color = Branco,
                                 fontSize = 26.sp,
                                 fontWeight = FontWeight.Bold
@@ -144,7 +152,7 @@ fun TelaOrcamento(navController: NavController) {
 
                             Text(
                                 text =
-                                    "Acompanhe seus limites mensais",
+                                    "Veja um resumo dos seus gastos",
 
                                 color = VerdeClaro,
                                 fontSize = 14.sp
@@ -153,6 +161,7 @@ fun TelaOrcamento(navController: NavController) {
                     }
                 }
             }
+
 
 
             item {
@@ -177,7 +186,7 @@ fun TelaOrcamento(navController: NavController) {
                     ) {
 
                         Text(
-                            text = "Orçamento total",
+                            text = "Total gasto",
                             color = VerdeClaro,
                             fontSize = 13.sp
                         )
@@ -185,79 +194,188 @@ fun TelaOrcamento(navController: NavController) {
                         Text(
                             text =
                                 "R$ %.2f"
-                                    .format(limiteTotal),
+                                    .format(totalGasto),
 
                             color = Branco,
-                            fontSize = 30.sp,
+                            fontSize = 31.sp,
                             fontWeight = FontWeight.Bold
                         )
 
                         Spacer(
-                            modifier = Modifier.height(18.dp)
+                            modifier = Modifier.height(8.dp)
                         )
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
+                        Text(
+                            text =
+                                "$quantidadeDespesas despesas registradas",
 
-                            horizontalArrangement =
-                                Arrangement.SpaceBetween
+                            color = VerdeClaro,
+                            fontSize = 13.sp
+                        )
+                    }
+                }
+            }
+
+
+            item {
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+
+                    horizontalArrangement =
+                        Arrangement.spacedBy(12.dp)
+                ) {
+
+                    Card(
+                        modifier = Modifier.weight(1f),
+
+                        shape =
+                            RoundedCornerShape(18.dp),
+
+                        colors =
+                            CardDefaults.cardColors(
+                                containerColor = Branco
+                            )
+                    ) {
+
+                        Column(
+                            modifier = Modifier.padding(16.dp)
                         ) {
 
-                            Column {
+                            Text(
+                                text = "Despesas",
+                                color = Cinza,
+                                fontSize = 12.sp
+                            )
 
-                                Text(
-                                    text = "Gasto",
-                                    color = VerdeClaro,
-                                    fontSize = 12.sp
-                                )
+                            Text(
+                                text =
+                                    quantidadeDespesas.toString(),
 
-                                Text(
-                                    text =
-                                        "R$ %.2f"
-                                            .format(gastoTotal),
+                                color = VerdeEscuro,
 
-                                    color = Branco,
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
+                                fontSize = 23.sp,
 
-                            Column(
-                                horizontalAlignment =
-                                    Alignment.End
-                            ) {
+                                fontWeight =
+                                    FontWeight.Bold
+                            )
+                        }
+                    }
 
-                                Text(
-                                    text = "Restante",
-                                    color = VerdeClaro,
-                                    fontSize = 12.sp
-                                )
+                    Card(
+                        modifier = Modifier.weight(1f),
 
-                                Text(
-                                    text =
-                                        "R$ %.2f"
-                                            .format(restanteTotal),
+                        shape =
+                            RoundedCornerShape(18.dp),
 
-                                    color =
-                                        if (restanteTotal < 0) {
-                                            Color(0xFFFF8A80)
-                                        } else {
-                                            Branco
-                                        },
+                        colors =
+                            CardDefaults.cardColors(
+                                containerColor = Branco
+                            )
+                    ) {
 
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+
+                            Text(
+                                text = "Média",
+                                color = Cinza,
+                                fontSize = 12.sp
+                            )
+
+                            Text(
+                                text =
+                                    "R$ %.2f"
+                                        .format(media),
+
+                                color = VerdeEscuro,
+
+                                fontSize = 18.sp,
+
+                                fontWeight =
+                                    FontWeight.Bold
+                            )
                         }
                     }
                 }
             }
 
+
             item {
 
+                Spacer(
+                    modifier = Modifier.height(18.dp)
+                )
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+
+                    shape = RoundedCornerShape(20.dp),
+
+                    colors = CardDefaults.cardColors(
+                        containerColor = CardVerde
+                    )
+                ) {
+
+                    Row(
+                        modifier = Modifier.padding(18.dp),
+
+                        verticalAlignment =
+                            Alignment.CenterVertically
+                    ) {
+
+                        Icon(
+                            imageVector =
+                                Icons.Filled.TrendingUp,
+
+                            contentDescription = null,
+
+                            tint = VerdePrincipal,
+
+                            modifier =
+                                Modifier.size(30.dp)
+                        )
+
+                        Spacer(
+                            modifier = Modifier.size(14.dp)
+                        )
+
+                        Column {
+
+                            Text(
+                                text = "Maior categoria de gasto",
+                                color = VerdeEscuro,
+                                fontSize = 13.sp
+                            )
+
+                            Text(
+                                text =
+                                    categoriaMaiorGasto
+                                        ?.nome
+                                        ?: "Nenhuma",
+
+                                color = VerdeEscuro,
+
+                                fontSize = 18.sp,
+
+                                fontWeight =
+                                    FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                Spacer(
+                    modifier = Modifier.height(20.dp)
+                )
+
                 Text(
-                    text = "Orçamento por categoria",
+                    text = "Resumo por categoria",
 
                     color = VerdeEscuro,
 
@@ -266,22 +384,25 @@ fun TelaOrcamento(navController: NavController) {
                     fontWeight = FontWeight.Bold,
 
                     modifier = Modifier.padding(
-                        horizontal = 20.dp,
-                        vertical = 5.dp
+                        horizontal = 20.dp
                     )
+                )
+
+                Spacer(
+                    modifier = Modifier.height(8.dp)
                 )
             }
 
 
             items(
-                items = Dados.categorias,
+                items = categoriaState.categorias,
                 key = {
                     it.id
                 }
             ) { categoria ->
 
                 val gasto =
-                    Dados.despesas
+                    despesaState.despesas
                         .filter {
                             it.categoriaId == categoria.id
                         }
@@ -289,23 +410,13 @@ fun TelaOrcamento(navController: NavController) {
                             it.valor
                         }
 
-                val percentual =
-                    if (categoria.limite > 0) {
-                        (gasto / categoria.limite)
+                val porcentagemTotal =
+                    if (totalGasto > 0) {
+                        (gasto / totalGasto)
                             .coerceIn(0.0, 1.0)
                             .toFloat()
                     } else {
                         0f
-                    }
-
-                val ultrapassou =
-                    gasto > categoria.limite
-
-                val cor =
-                    if (ultrapassou) {
-                        Color(0xFFE53935)
-                    } else {
-                        VerdePrincipal
                     }
 
                 Card(
@@ -316,7 +427,7 @@ fun TelaOrcamento(navController: NavController) {
                             vertical = 6.dp
                         ),
 
-                    shape = RoundedCornerShape(20.dp),
+                    shape = RoundedCornerShape(18.dp),
 
                     colors = CardDefaults.cardColors(
                         containerColor = Branco
@@ -337,17 +448,18 @@ fun TelaOrcamento(navController: NavController) {
                             Text(
                                 text = categoria.nome,
                                 color = VerdeEscuro,
-                                fontSize = 17.sp,
+                                fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
 
                             Text(
                                 text =
-                                    "${(percentual * 100).toInt()}%",
+                                    "R$ %.2f"
+                                        .format(gasto),
 
-                                color = cor,
+                                color = VerdePrincipal,
 
-                                fontSize = 15.sp,
+                                fontSize = 14.sp,
 
                                 fontWeight =
                                     FontWeight.Bold
@@ -355,13 +467,13 @@ fun TelaOrcamento(navController: NavController) {
                         }
 
                         Spacer(
-                            modifier = Modifier.height(12.dp)
+                            modifier = Modifier.height(10.dp)
                         )
 
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(9.dp)
+                                .height(8.dp)
                                 .clip(
                                     RoundedCornerShape(50.dp)
                                 )
@@ -370,83 +482,30 @@ fun TelaOrcamento(navController: NavController) {
 
                             Box(
                                 modifier = Modifier
-                                    .fillMaxWidth(percentual)
-                                    .height(9.dp)
+                                    .fillMaxWidth(
+                                        porcentagemTotal
+                                    )
+                                    .height(8.dp)
                                     .clip(
                                         RoundedCornerShape(50.dp)
                                     )
-                                    .background(cor)
+                                    .background(
+                                        VerdePrincipal
+                                    )
                             )
                         }
 
                         Spacer(
-                            modifier = Modifier.height(10.dp)
+                            modifier = Modifier.height(6.dp)
                         )
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
+                        Text(
+                            text =
+                                "${(porcentagemTotal * 100).toInt()}% do total",
 
-                            horizontalArrangement =
-                                Arrangement.SpaceBetween
-                        ) {
-
-                            Text(
-                                text =
-                                    "R$ %.2f gasto"
-                                        .format(gasto),
-
-                                color = Cinza,
-                                fontSize = 12.sp
-                            )
-
-                            Text(
-                                text =
-                                    "Limite: R$ %.2f"
-                                        .format(categoria.limite),
-
-                                color = Cinza,
-                                fontSize = 12.sp
-                            )
-                        }
-
-                        if (ultrapassou) {
-
-                            Spacer(
-                                modifier = Modifier.height(10.dp)
-                            )
-
-                            Row(
-                                verticalAlignment =
-                                    Alignment.CenterVertically
-                            ) {
-
-                                Icon(
-                                    imageVector =
-                                        Icons.Filled.Warning,
-
-                                    contentDescription = null,
-
-                                    tint =
-                                        Color(0xFFE53935),
-
-                                    modifier =
-                                        Modifier.size(18.dp)
-                                )
-
-                                Text(
-                                    text =
-                                        " Limite ultrapassado",
-
-                                    color =
-                                        Color(0xFFE53935),
-
-                                    fontSize = 12.sp,
-
-                                    fontWeight =
-                                        FontWeight.Bold
-                                )
-                            }
-                        }
+                            color = Cinza,
+                            fontSize = 11.sp
+                        )
                     }
                 }
             }
